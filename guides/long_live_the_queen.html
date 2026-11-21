@@ -1,27 +1,52 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="dark">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="light">
+  <meta name="color-scheme" content="dark light">
   <meta name="description" content="Long Live The Queen 40 周路线与清单查询">
   <title>王冠路线图 · Long Live The Queen</title>
+  <script>
+    try {
+      if (localStorage.getItem("lltq-guide-theme") === "light") document.documentElement.dataset.theme = "light";
+    } catch {}
+  </script>
   <style>
     :root {
+      color-scheme: light;
       --paper: #f8f6f3; --surface: #fffdfb; --ink: #241d2a; --muted: #675e6c;
       --line: #e8e0e5; --plum: #412348; --deep: #251429; --accent: #a64e6e;
       --pink: #f5e6ec; --green: #245f4a; --green-bg: #e8f3eb;
       --rust: #962f4b; --rust-bg: #faeaf0;
+      --gold: #694811; --gold-bg: #f8efd8;
+      --primary: #412348; --primary-hover: #57345e; --primary-text: #fff;
+      --focus: #ac668c; --control-line: #d9cbd7; --field: #fff;
+      --accent-text: #744763; --row-heading: #624459;
+      --wash: #f8edf4; --row-header: #f7f1f5; --row-target: #fcf0f5; --row-closed: #faf7f9;
+      --bar-shadow: #28142912; --dialog-shadow: #28142945; --backdrop: #24152bcc;
       --font: "Segoe UI", "Microsoft YaHei UI", "PingFang SC", sans-serif;
       --serif: "Palatino Linotype", Georgia, "Songti SC", "SimSun", serif;
       --topbar-height: 72px; --sticky-gap: 12px;
+    }
+    :root[data-theme="dark"] {
+      color-scheme: dark;
+      --paper: #17111c; --surface: #231a29; --ink: #f7edf6; --muted: #c7b7c6;
+      --line: #47354b; --plum: #f2d3ed; --deep: #413047; --accent: #e18ab4;
+      --pink: #4b2d46; --green: #a8dfc0; --green-bg: #24392f;
+      --rust: #ffb7ca; --rust-bg: #452337;
+      --gold: #f6d690; --gold-bg: #473721;
+      --primary: #ead0eb; --primary-hover: #f7e1f4; --primary-text: #2b1830;
+      --focus: #eca3c9; --control-line: #896887; --field: #1b1420;
+      --accent-text: #dfafd2; --row-heading: #dfc3da;
+      --wash: #36273b; --row-header: #2c2033; --row-target: #3a2539; --row-closed: #201825;
+      --bar-shadow: #0b070e65; --dialog-shadow: #08050bad; --backdrop: #100a16d6;
     }
     *, *::before, *::after { box-sizing: border-box; }
     body { margin: 0; min-width: 280px; background: var(--paper); color: var(--ink); font: 1rem/1.52 var(--font); }
     button, input, select { font: inherit; }
     button { cursor: pointer; color: inherit; }
     button:focus-visible, a:focus-visible, summary:focus-visible, input:focus-visible, select:focus-visible {
-      outline: 3px solid #ac668c; outline-offset: 4px;
+      outline: 3px solid var(--focus); outline-offset: 4px;
     }
     button:disabled { opacity: .55; cursor: default; }
     a { color: var(--plum); text-underline-offset: .2em; }
@@ -29,20 +54,23 @@
     .shell { width: min(100% - 72px, 1312px); margin-inline: auto; }
     .topbar { position: sticky; top: 0; z-index: 5; background: var(--surface); box-shadow: inset 0 -1px var(--line); }
     .topbar .shell { height: var(--topbar-height); display: flex; align-items: center; gap: 1rem; }
-    .topbar.has-target { box-shadow: inset 0 -1px var(--line), 0 4px 12px #28142912; }
+    .topbar.has-target { box-shadow: inset 0 -1px var(--line), 0 4px 12px var(--bar-shadow); }
     .wordmark { display: flex; align-items: center; gap: 12px; min-width: 0; }
     .seal { display: grid; place-items: center; background: var(--deep); color: #f9d6e6; width: 42px; height: 42px; flex: none; border-radius: 10px; font: 1.65rem/1 var(--serif); }
     .wordmark strong { display: block; font-size: 1.05rem; line-height: 1.3; letter-spacing: .06em; }
     .wordmark small { display: block; color: var(--muted); font-size: .76rem; letter-spacing: .06em; }
     .topbar-actions { display: flex; flex: none; gap: .5rem; align-items: center; margin-inline-start: auto; }
+    .action-short { display: none; }
     .pinned-target { min-width: 0; border-inline-start: 1px solid var(--line); padding-inline-start: 1rem; }
     .pinned-target strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--plum); line-height: 1.25; }
     .pinned-target small { display: block; color: var(--muted); font-size: .79rem; margin-top: 2px; }
+    .pinned-target .pinned-details-short { display: none; }
     .button { border: 1px solid transparent; border-radius: 9px; padding: .57rem .95rem; min-height: 41px; font-size: .92rem; font-weight: 700; white-space: nowrap; }
-    .button.primary { background: var(--plum); color: white; }
-    .button.primary:hover { background: #57345e; }
-    .button.secondary { background: var(--surface); border-color: #d9cbd7; color: var(--plum); }
-    .button.secondary:hover { background: #f9edf3; }
+    .button.primary { background: var(--primary); color: var(--primary-text); }
+    .button.primary:hover { background: var(--primary-hover); }
+    .button.secondary { background: var(--surface); border-color: var(--control-line); color: var(--plum); }
+    .button.secondary:hover { background: var(--wash); }
+    .topbar-actions .theme-toggle { width: 41px; padding: 0; display: inline-grid; place-items: center; font-size: 1.23rem; line-height: 1; }
     .hero { position: relative; isolation: isolate; overflow: hidden; margin: 30px 0 24px; border-radius: 21px; padding: clamp(26px,4vw,45px); color: #fff4f9; background: linear-gradient(116deg,#26152f 0%,#3b2146 63%,#542b50 100%); }
     .hero::before, .hero::after { content: ""; position: absolute; z-index: -1; width: 310px; height: 310px; top: -83px; right: -47px; border: 1px solid #f6cee529; transform: rotate(33deg); border-radius: 64px; pointer-events: none; }
     .hero::after { width: 380px; height: 380px; right: -23px; top: -130px; border-color: #f6cee521; }
@@ -56,29 +84,29 @@
     .hero-facts div:last-child { padding-right: 0; }
     .hero-facts dt { color: #efd7e9; font-size: .82rem; }
     .hero-facts dd { margin: 3px 0 0; font-size: 1.34rem; font-weight: 700; font-variant-numeric: tabular-nums; }
-    .campaign { background: #f3e7ee; border: 1px solid #e7d7e2; margin-bottom: 1rem; border-radius: 13px; padding: 14px 17px; }
+    .campaign { background: var(--pink); border: 1px solid var(--line); margin-bottom: 1rem; border-radius: 13px; padding: 14px 17px; }
     .campaign p { margin: 0 0 .7rem; }
     .campaign-options { display: flex; flex-wrap: wrap; gap: .4rem; }
-    .campaign-options button { background: var(--surface); border: 1px solid #dfcad9; padding: .35rem .6rem; border-radius: 7px; font-size: .88rem; }
-    .campaign-options button[aria-pressed=true] { background: var(--plum); color: white; border-color: var(--plum); }
+    .campaign-options button { background: var(--surface); border: 1px solid var(--control-line); padding: .35rem .6rem; border-radius: 7px; font-size: .88rem; }
+    .campaign-options button[aria-pressed=true] { background: var(--primary); color: var(--primary-text); border-color: var(--primary); }
     .layout { display: grid; grid-template-columns: minmax(0,1fr) minmax(260px,294px); grid-template-areas: "weeks rewards"; gap: 24px; align-items: start; }
     .week-panel { grid-area: weeks; }
     .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 15px; }
     .panel-top { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 20px 20px 16px; }
     h2 { margin: 0; font-size: 1.18rem; letter-spacing: -.016em; }
     .route-note { margin: .3rem 0 0; color: var(--muted); font-size: .87rem; }
-    select { appearance: none; padding: .4rem 2.2rem .4rem .7rem; border-radius: 8px; border: 1px solid #daceD9; background: var(--surface); color: var(--plum); font-size: .9rem; max-width: 100%; }
+    select { appearance: none; padding: .4rem 2.2rem .4rem .7rem; border-radius: 8px; border: 1px solid var(--control-line); background: var(--surface); color: var(--plum); font-size: .9rem; max-width: 100%; }
     .select-wrap { position: relative; align-self: center; }
-    .select-wrap::after { content: ""; position: absolute; width: 7px; height: 7px; border-right: 2px solid #6c5269; border-bottom: 2px solid #6c5269; rotate: 45deg; right: .85rem; top: calc(50% - 5px); pointer-events: none; }
+    .select-wrap::after { content: ""; position: absolute; width: 7px; height: 7px; border-right: 2px solid var(--accent-text); border-bottom: 2px solid var(--accent-text); rotate: 45deg; right: .85rem; top: calc(50% - 5px); pointer-events: none; }
     .periods { display: flex; flex-wrap: wrap; gap: 5px; padding: 1px 20px 14px; }
     .tab { border: 0; border-radius: 7px; background: transparent; padding: .35rem .7rem; font-size: .9rem; color: var(--muted); min-height: 36px; }
-    .tab:hover { background: #f5edf2; color: var(--plum); }
-    .tab[aria-pressed=true] { background: var(--pink); color: #632a49; font-weight: 700; }
-    .route-head { display: grid; grid-template-columns: 64px minmax(108px,.95fr) minmax(185px,1.55fr) minmax(166px,1.38fr); gap: 14px; align-items: center; border-block: 1px solid var(--line); background: #f7f1f5; padding: 9px 20px; color: #624459; font-size: .83rem; font-weight: 700; }
+    .tab:hover { background: var(--wash); color: var(--plum); }
+    .tab[aria-pressed=true] { background: var(--pink); color: var(--plum); font-weight: 700; }
+    .route-head { display: grid; grid-template-columns: 64px minmax(108px,.95fr) minmax(185px,1.55fr) minmax(166px,1.38fr); gap: 14px; align-items: center; border-block: 1px solid var(--line); background: var(--row-header); padding: 9px 20px; color: var(--row-heading); font-size: .83rem; font-weight: 700; }
     .week-row { display: grid; grid-template-columns: 64px minmax(108px,.95fr) minmax(185px,1.55fr) minmax(166px,1.38fr); gap: 14px; padding: 14px 20px; border-bottom: 1px solid var(--line); font-size: .9rem; }
     .week-row:last-child { border-bottom: 0; }
-    .week-row.is-target { background: #fcf0f5; }
-    .week-row.is-closed { color: var(--muted); background: #faf7f9; }
+    .week-row.is-target { background: var(--row-target); }
+    .week-row.is-closed { color: var(--muted); background: var(--row-closed); }
     .week-heading { margin: 0; font-size: 1.09rem; line-height: 1.3; font-variant-numeric: tabular-nums; }
     .mood { display: block; font-size: .74rem; margin-top: 4px; color: var(--muted); }
     .course { margin: 0 0 .4rem; }
@@ -90,14 +118,14 @@
     .minor { display: block; color: var(--muted); font-size: .77rem; font-variant-numeric: tabular-nums; }
     .event-list, .checks, .reward-list { list-style: none; margin: 0; padding: 0; }
     .event-list li { margin: 0 0 .23rem; }
-    .marker { font-size: .74rem; margin-right: 5px; color: #795066; font-weight: 700; }
+    .marker { font-size: .74rem; margin-right: 5px; color: var(--accent-text); font-weight: 700; }
     .check { margin-bottom: .55rem; }
     .check:last-child { margin-bottom: .15rem; }
     .check-title { font-weight: 650; }
     .state { display: inline-block; margin-left: 5px; border-radius: 5px; padding: 0 5px; font-size: .72rem; font-weight: 700; line-height: 1.55; }
     .state.good { background: var(--green-bg); color: var(--green); }
     .state.bad { background: var(--rust-bg); color: var(--rust); }
-    .state.partial { background: #f8efd8; color: #694811; }
+    .state.partial { background: var(--gold-bg); color: var(--gold); }
     details { margin-top: .35rem; }
     summary { color: var(--plum); cursor: pointer; font-weight: 600; font-size: .82rem; }
     details[open] .checks { padding-top: .35rem; }
@@ -115,30 +143,31 @@
     .side h2 { padding-inline: 3px; }
     .side .route-note { padding-inline: 3px; }
     .reward-section { margin-top: .95rem; border-top: 1px solid var(--line); padding-top: .75rem; }
-    .reward-section h3 { margin: 0 3px .35rem; font-size: .88rem; color: #76546b; }
+    .reward-section h3 { margin: 0 3px .35rem; font-size: .88rem; color: var(--accent-text); }
     .reward { border: 0; background: transparent; text-align: left; width: 100%; padding: 6px; border-radius: 6px; display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: .88rem; }
-    .reward:hover { background: #f8edf4; }
-    .reward.active { color: #722f54; background: var(--pink); font-weight: 700; }
+    .reward:hover { background: var(--wash); }
+    .reward.active { color: var(--plum); background: var(--pink); font-weight: 700; }
     .reward small { color: var(--muted); font-size: .74rem; flex-shrink: 0; }
     .footer { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; font-size: .85rem; color: var(--muted); padding: 20px 0 35px; }
     .footer details { max-width: 720px; margin: 0; }
     .footer p { margin: .45rem 0 0; }
-    dialog { padding: 0; width: min(640px,calc(100% - 30px)); max-height: min(760px,90dvh); background: var(--surface); color: var(--ink); border: 1px solid #d7bfd3; border-radius: 17px; box-shadow: 0 18px 90px #28142945; overflow: hidden; }
-    dialog::backdrop { background: #24152bcc; }
+    dialog { padding: 0; width: min(640px,calc(100% - 30px)); max-height: min(760px,90dvh); background: var(--surface); color: var(--ink); border: 1px solid var(--control-line); border-radius: 17px; box-shadow: 0 18px 90px var(--dialog-shadow); overflow: hidden; }
+    dialog::backdrop { background: var(--backdrop); }
     .dialog-inner { display: flex; flex-direction: column; max-height: min(758px,89dvh); }
     .dialog-top { padding: 18px 22px 12px; display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
     .close { border: 1px solid var(--line); background: transparent; border-radius: 8px; width: 40px; height: 40px; font-size: 1.25rem; }
     .close:hover { background: var(--pink); }
     .modal-controls { padding: 0 22px 10px; }
-    #search { width: 100%; padding: .62rem .72rem; border: 1px solid #d8c7d5; border-radius: 8px; background: white; color: var(--ink); }
+    #search { width: 100%; padding: .62rem .72rem; border: 1px solid var(--control-line); border-radius: 8px; background: var(--field); color: var(--ink); }
+    #search::placeholder { color: var(--muted); opacity: 1; }
     .categories { display: flex; flex-wrap: wrap; gap: .15rem; margin-top: .7rem; }
     .item-list { overflow: auto; overscroll-behavior: contain; padding: 4px 15px 15px; min-height: 100px; border-top: 1px solid var(--line); }
     .item-button { display: grid; grid-template-columns: 35px minmax(0,1fr) auto; text-align: left; width: 100%; gap: .65rem; align-items: center; border: 0; border-bottom: 1px solid var(--line); background: transparent; padding: .61rem .52rem; font-size: .95rem; }
     .item-button:last-child { border-bottom: 0; }
-    .item-button:hover, .item-button[aria-current=true] { background: #f8edf4; }
+    .item-button:hover, .item-button[aria-current=true] { background: var(--wash); }
     .item-button strong { display: block; font-weight: 650; }
-    .id-label { color: #744763; font-size: .75rem; font-weight: 700; font-variant-numeric: tabular-nums; }
-    .item-category { color: #785d73; font-size: .77rem; }
+    .id-label { color: var(--accent-text); font-size: .75rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .item-category { color: var(--muted); font-size: .77rem; }
     .empty { padding: 1rem .65rem; color: var(--muted); }
     .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
     @media (max-width: 1110px) {
@@ -186,6 +215,10 @@
     @media (max-width: 395px) {
       .wordmark small { display: none; }
       .wordmark strong { font-size: .94rem; }
+      .action-full, #pinned-details { display: none; }
+      .action-short { display: inline; }
+      .pinned-target .pinned-details-short { display: block; }
+      .topbar-actions .theme-toggle { width: 36px; }
       .pinned-target small { line-height: 1.2; }
     }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; } }
@@ -197,10 +230,14 @@
       <div class="wordmark"><span class="seal" aria-hidden="true">♛</span><div><strong data-i18n="brand">王冠路线图</strong><small>Long Live The Queen</small></div></div>
       <div id="pinned-target" class="pinned-target" hidden>
         <strong id="pinned-title"></strong><small id="pinned-details"></small>
+        <small id="pinned-details-short" class="pinned-details-short"></small>
       </div>
       <div class="topbar-actions">
-        <button id="language" class="button secondary" type="button" lang="en">English</button>
-        <button id="choose" class="button primary" type="button" aria-haspopup="dialog" data-i18n="choose">选择清单目标</button>
+        <button id="theme" class="button secondary theme-toggle" type="button" aria-label="切换浅色模式" title="切换浅色模式"><span id="theme-icon" aria-hidden="true">☀︎</span></button>
+        <button id="language" class="button secondary" type="button" lang="en"><span id="language-full" class="action-full">English</span><span id="language-short" class="action-short">EN</span></button>
+        <button id="choose" class="button primary" type="button" aria-haspopup="dialog" data-i18n-aria="choose">
+          <span class="action-full" data-i18n="choose">选择目标</span><span class="action-short" data-i18n="chooseShort">选目标</span>
+        </button>
       </div>
     </div>
   </header>
@@ -282,13 +319,17 @@
     const strings = {
       brand: ["王冠路线图", "Crown Routes"],
       choose: ["选择目标", "Choose target"],
+      chooseShort: ["选目标", "Choose"],
       languageAction: ["切换到英文", "Switch to Simplified Chinese"],
+      darkTheme: ["切换深色模式", "Switch to dark mode"],
+      lightTheme: ["切换浅色模式", "Switch to light mode"],
       unlocksAt: ["目标解锁", "Unlocks"],
       routeEnd: ["路线终点", "Route ends"],
       rewards: ["本路线解锁", "Route unlocks"],
       deathCampaign: ["累计死亡路线", "Cumulative death routes"],
       campaignNote: ["累计 {count} 种不同死法。每次死亡后开新周目或读档，再切换到下一条路线。", "Find {count} different ways to die. After each death, start a new run or reload before following the next route."],
       campaignAt: ["第 {run} 条路线 · 第 {week} 周", "Run {run} · Week {week}"],
+      campaignShort: ["第 {run} 局 / 第 {week} 周", "Run {run} / W{week}"],
       atWeek: ["第 {week} 周解锁", "Unlocks in week {week}"],
       timeline: ["40 周路线", "40-week route"],
       routeVariants: ["该目标的路线", "Routes for this target"],
@@ -410,9 +451,11 @@
       });
       search.placeholder = t("searchPlaceholder");
       const switcher = byId("language");
-      switcher.textContent = langIndex === 0 ? "English" : "简体中文";
+      byId("language-full").textContent = langIndex === 0 ? "English" : "简体中文";
+      byId("language-short").textContent = langIndex === 0 ? "EN" : "中文";
       switcher.lang = langIndex === 0 ? "en" : "zh-CN";
       switcher.setAttribute("aria-label", t("languageAction"));
+      updateThemeButton();
       byId("categories").querySelectorAll("button").forEach(button => {
         const type = button.dataset.type;
         const count = type ? data.items.filter(item => item.id.startsWith(type)).length : data.items.length;
@@ -423,6 +466,24 @@
       });
       const toggle = byId("rewards-toggle");
       toggle.textContent = t(toggle.getAttribute("aria-expanded") === "true" ? "collapse" : "expand");
+    }
+
+    function updateThemeButton() {
+      const isDark = document.documentElement.dataset.theme === "dark";
+      const label = t(isDark ? "lightTheme" : "darkTheme");
+      const button = byId("theme");
+      button.setAttribute("aria-label", label);
+      button.title = label;
+      byId("theme-icon").textContent = isDark ? "☀︎" : "☾";
+    }
+
+    function toggleTheme() {
+      const theme = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+      document.documentElement.dataset.theme = theme;
+      try {
+        localStorage.setItem("lltq-guide-theme", theme);
+      } catch {}
+      updateThemeButton();
     }
 
     function formatStats(value) {
@@ -675,6 +736,7 @@
       byId("pinned-title").textContent = title;
       byId("pinned-title").title = title;
       byId("pinned-details").textContent = target + " · " + unlockTime;
+      byId("pinned-details-short").textContent = target + " · " + (campaign ? t("campaignShort", { run: campaign.length, week }) : weekLabel(week));
       byId("unlock-week").textContent = campaign ? unlockTime : weekLabel(week);
       byId("route-end").textContent = weekLabel(route.end);
       byId("reward-total").textContent = t("itemCount", { count: Object.keys(route.unlocks).length });
@@ -715,6 +777,7 @@
       updatePinnedTarget();
     }
 
+    byId("theme").addEventListener("click", toggleTheme);
     byId("language").addEventListener("click", switchLanguage);
     window.addEventListener("scroll", updatePinnedTarget, { passive: true });
     window.addEventListener("resize", updatePinnedTarget);
